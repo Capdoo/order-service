@@ -2,6 +2,8 @@ package org.rnontol.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -32,6 +34,8 @@ public class OrderController {
 
     @POST
     @WithTransaction
+    @Counted(value = "orders.create.count", description = "Numero de veces que se llama al endpoint POST /orders/")
+    @Timed(value = "orders.create.time", description = "Tiempo que toma ejecutar el endpoint POST /orders/")
     public Uni<Response> registrarOrden(Order order) {
         Long idCliente = order.clientId;
 
@@ -60,6 +64,8 @@ public class OrderController {
     @GET
     @WithSession
     @Produces(MediaType.APPLICATION_JSON)
+    @Counted(value = "orders.get_all.count", description = "Número de llamadas al endpoint GET /orders")
+    @Timed(value = "orders.get_all.time", description = "Tiempo de ejecución del endpoint GET /orders")
     public Uni<List<Order>> getOrders() {
         return Order.listAll();
     }
@@ -68,6 +74,8 @@ public class OrderController {
     @Path("/{id}")
     @WithSession
     @Produces(MediaType.APPLICATION_JSON)
+    @Counted(value = "orders.get_by_id.count", description = "Número de llamadas al endpoint GET /orders/{id}")
+    @Timed(value = "orders.get_by_id.time", description = "Tiempo de ejecución del endpoint GET /orders/{id}")
     public Uni<Order> getOrder(@PathParam("id") long id) {
         return Order.findById(id);
     }
@@ -76,6 +84,8 @@ public class OrderController {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
+    @Counted(value = "orders.update.count", description = "Número de llamadas al endpoint PUT /orders/{id}")
+    @Timed(value = "orders.update.time", description = "Tiempo de ejecución del endpoint PUT /orders/{id}")
     public Order updateOrder(@PathParam("id") long id, Order order) {
         Order entity = (Order) Order.findById(id);
         if (entity == null) {
@@ -96,6 +106,8 @@ public class OrderController {
     @DELETE
     @Transactional
     @Path("/{id}")
+    @Counted(value = "orders.delete.count", description = "Número de llamadas al endpoint DELETE /orders/{id}")
+    @Timed(value = "orders.delete.time", description = "Tiempo de ejecución del endpoint DELETE /orders/{id}")
     public void deleteOrder(@PathParam("id") long id) {
         Order entity = (Order) Order.findById(id);
         if (entity == null) {
